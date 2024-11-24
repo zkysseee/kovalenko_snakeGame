@@ -83,8 +83,7 @@ class Snake:
         # print(event)
 class Food:
     def __init__(self):
-        self.pos_x = SEG_SIZE*(random.randint(1, (WIDTH - SEG_SIZE) // SEG_SIZE))
-        self.pos_y =SEG_SIZE*(random.randint(1, (HEIGHT - SEG_SIZE) // SEG_SIZE))
+        self.pos_x, self.pos_y =self.generate_rand_pos()
         self.instance = c.create_oval(self.pos_x, self.pos_y,
                                       self.pos_x+SEG_SIZE,
                                       self.pos_y+SEG_SIZE,
@@ -93,12 +92,19 @@ class Food:
     def check_snake(self):
             snake_head_coords = c.coords(s.segments[-1].instance)
             if snake_head_coords == c.coords(self.instance):
-                 self.pos_x = SEG_SIZE * (random.randint(1, (WIDTH - SEG_SIZE) // SEG_SIZE))
-                 self.pos_y = SEG_SIZE * (random.randint(1, (HEIGHT - SEG_SIZE) // SEG_SIZE))
+                 self.pos_x, self.pos_y =self.generate_rand_pos()
                  c.coords(self.instance,
                           self.pos_x, self.pos_y,
                           self.pos_x + SEG_SIZE,
                           self.pos_y + SEG_SIZE,)
+
+    def generate_rand_pos(self):
+        rand_x = SEG_SIZE * (random.randint(1, (WIDTH - SEG_SIZE) // SEG_SIZE))
+        rand_y = SEG_SIZE * (random.randint(1, (HEIGHT - SEG_SIZE) // SEG_SIZE))
+        return rand_x, rand_y
+
+
+
 
 
 segments = [Segment(SEG_SIZE, SEG_SIZE),
