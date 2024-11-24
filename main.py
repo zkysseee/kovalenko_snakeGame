@@ -1,3 +1,4 @@
+import random
 from tkinter import *
 
 root = Tk()
@@ -18,7 +19,7 @@ class Segment:
         self.instance = c.create_rectangle(x, y,
                                            x + SEG_SIZE, y + SEG_SIZE,
                                            fill='white',
-                                           outline='white'
+                                           outline='black'
                                            )
 
 
@@ -80,7 +81,14 @@ class Snake:
                 print('right')
                 self.vector = 'right'
         # print(event)
-
+class Food:
+    def __init__(self):
+        self.pos_x = SEG_SIZE*(random.randint(1, (WIDTH - SEG_SIZE) // SEG_SIZE))
+        self.pos_y =SEG_SIZE*(random.randint(1, (HEIGHT - SEG_SIZE) // SEG_SIZE))
+        self.instance = c.create_oval(self.pos_x, self.pos_y,
+                                      self.pos_x+SEG_SIZE,
+                                      self.pos_y+SEG_SIZE,
+                                      fill = 'red')
 
 segments = [Segment(SEG_SIZE, SEG_SIZE),
             Segment(SEG_SIZE*2, SEG_SIZE),
@@ -97,7 +105,7 @@ c.bind("<Key>", s.change_direction)
 # c.bind("<Control-c>", s.change_direction)
 # c.bind("<KeyPress-f>", s.change_direction)
 # c.bind("<Button-1>", s.change_direction)
-
+apple = Food()
 
 def main():
     s.move()
