@@ -90,6 +90,17 @@ class Food:
                                       self.pos_y+SEG_SIZE,
                                       fill = 'red')
 
+    def check_snake(self):
+            snake_head_coords = c.coords(s.segments[-1].instance)
+            if snake_head_coords == c.coords(self.instance):
+                 self.pos_x = SEG_SIZE * (random.randint(1, (WIDTH - SEG_SIZE) // SEG_SIZE))
+                 self.pos_y = SEG_SIZE * (random.randint(1, (HEIGHT - SEG_SIZE) // SEG_SIZE))
+                 c.coords(self.instance,
+                          self.pos_x, self.pos_y,
+                          self.pos_x + SEG_SIZE,
+                          self.pos_y + SEG_SIZE,)
+
+
 segments = [Segment(SEG_SIZE, SEG_SIZE),
             Segment(SEG_SIZE*2, SEG_SIZE),
             Segment(SEG_SIZE*3, SEG_SIZE),
@@ -109,6 +120,7 @@ apple = Food()
 
 def main():
     s.move()
+    apple.check_snake()
     root.after(300, main)
 
 main()
