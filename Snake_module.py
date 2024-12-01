@@ -2,10 +2,10 @@ from tkinter import *
 import random
 from PIL import Image, ImageTk
 
-
 class Segment:
     def __init__(self, size, x, y, c):
         self.size = size
+        self.c = c
         self.instance = c.create_rectangle(x, y,
                                            x + self.size, y + self.size,
                                            fill='white',
@@ -14,12 +14,15 @@ class Segment:
 
 
 class Snake:
-    def __init__(self, segments, c):
-        self.segments = segments
-        self.c = c
+    def __init__(self, first_segment:Segment):
+        self.c = first_segment.c
+        self.segment = first_segment
+        self.SEG_SIZE = self.segment.size
+        self.segments = [self.segment,
+                         Segment(self.SEG_SIZE, self.SEG_SIZE*2, self.SEG_SIZE,self.c),
+                         Segment(self.SEG_SIZE, self.SEG_SIZE*3, self.SEG_SIZE, self.c)
+                         ]
         self.vector = 'right'
-        self.SEG_SIZE = self.segments[0].size
-
     def move(self):
         """
         Двигаем змейку в заданном направлении
@@ -72,8 +75,12 @@ class Snake:
             case 'd':
                 # print('right')
                 self.vector = 'right'
-        # print(event)
 
+    def add_segment(self):
+        last_seg =self.c.coords(self.segments[-1].instance)
+        x =last_seg[0]
+        y =last_seg[1]
+        self.segments.insert(0,Segment(self.SEG_SIZE,x,y,self.c))
 
 class Food:
     def __init__(self, snake: Snake, canvas: Canvas, img_path):
@@ -93,6 +100,7 @@ class Food:
         if snake_head_coords == [self.pos_x, self.pos_y, self.pos_x + self.SEG_SIZE, self.pos_y + self.SEG_SIZE]:
             self.pos_x, self.pos_y = self.generate_rand_pos()
             self.c.coords(self.instance, self.pos_x, self.pos_y)
+            self.s.add_segment()
 
     def generate_rand_pos(self):
         rand_x = self.SEG_SIZE * (random.randint(1, (self.WIDTH - self.SEG_SIZE) // self.SEG_SIZE))

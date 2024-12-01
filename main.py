@@ -13,12 +13,8 @@ c = Canvas(root, width=WIDTH, height=HEIGHT, bg='#003300')
 c.pack()
 root.update()
 
-segments = [Segment(SEG_SIZE, SEG_SIZE, SEG_SIZE, c),
-            Segment(SEG_SIZE, SEG_SIZE*2, SEG_SIZE,c),
-            Segment(SEG_SIZE, SEG_SIZE*3, SEG_SIZE,c),
-            ]
 
-s = Snake(segments,c)
+s = Snake(Segment(SEG_SIZE, SEG_SIZE, SEG_SIZE, c))
 
 c.focus_set()
 c.bind("<Key>", s.change_direction)
