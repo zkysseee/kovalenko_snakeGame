@@ -1,6 +1,4 @@
-from tkinter import *
-
-from Snake_module import Snake, Segment, Food
+from Snake_module import *
 
 root = Tk()
 
@@ -24,12 +22,14 @@ s = Snake(segments,c)
 
 c.focus_set()
 c.bind("<Key>", s.change_direction)
-apple = Food(s,c)
+apple = Food(s,c, "images/apple.png" ,)
+taco = Food(s,c, "images/taco.png" ,)
 
 
 def main():
     s.move()
     apple.check_snake()
+    taco.check_snake()
     root.after(300, main)
 
 main()
