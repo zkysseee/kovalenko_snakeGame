@@ -145,3 +145,25 @@ class Food:
         rand_x = self.SEG_SIZE * (random.randint(1, (self.WIDTH - self.SEG_SIZE) // self.SEG_SIZE))
         rand_y = self.SEG_SIZE * (random.randint(1, (self.HEIGHT - self.SEG_SIZE) // self.SEG_SIZE))
         return rand_x, rand_y
+
+class Game:
+    def __init__(self,c: Canvas, segment_size):
+        self.c = c
+        self.c.update()
+        self.segment_size = segment_size
+
+        self.s = Snake(Segment(self.segment_size, self.segment_size, self.segment_size, self.c))
+
+        self.c.focus_set()
+        self.c.bind("<Key>",self.s.change_direction)
+
+        self.apple = Food(self.s, self.c, "images/apple.png", -1)
+        self.taco = Food(self.s, self.c, "images/taco.png", 3)
+
+    def main(self):
+        self.s.move()
+        self.apple.check_snake()
+        self.taco.check_snake()
+        self.c.after(300, self.main)
+
+
