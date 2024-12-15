@@ -9,7 +9,7 @@ class Segment:
         self.c = c
         self.instance = self.c.create_rectangle(x, y,
                                                 x + self.size, y + self.size,
-                                                fill='white',
+                                                fill='black',
                                                 outline='black'
                                                 )
 
@@ -116,6 +116,11 @@ class Snake:
         self.score += val
         self.score_text = self.c.create_text(50, 20, text=f'Счёт: {self.score}', fill='white')
 
+    def bite_yourself(self):
+        for index in range(len(self.segments)-1):
+            if self.c.coords(self.segments[index].instance)== self.get_head_pos():
+                return True
+            return False
 
 class Food:
     def __init__(self, snake: Snake, canvas: Canvas, img_path, val=1):
@@ -145,12 +150,12 @@ class Food:
         return rand_x, rand_y
 
 class Game:
-    def __init__(self,c: Canvas, segment_size):
+    def __init__(self,c: Canvas,segment_size):
         self.c = c
         self.c.update()
         self.segment_size = segment_size
-
         self.start_new = True
+        Game.SEG_SIZE = segment_size
 
     def init_game(self):
         self.s = Snake(Segment(self.segment_size, self.segment_size, self.segment_size, self.c))
@@ -167,7 +172,7 @@ class Game:
             self.init_game()
             self.start_new = False
         self.s.move()
-        if not self.s.check_in_field():
+        if not self.s.check_in_field() or self.s.bite_yourself():
             self.c.delete('all')
             self.start_new = True
         self.apple.check_snake()

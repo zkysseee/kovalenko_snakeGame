@@ -13,5 +13,4 @@ c = Canvas(root, width=WIDTH, height=HEIGHT, bg='#003300')
 c.pack()
 game = Game(c, SEG_SIZE)
 game.main()
-
 root.mainloop()
