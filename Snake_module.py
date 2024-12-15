@@ -2,27 +2,35 @@ from tkinter import *
 import random
 from PIL import Image, ImageTk
 
+
 class Segment:
     def __init__(self, size, x, y, c):
         self.size = size
         self.c = c
-        self.instance = c.create_rectangle(x, y,
-                                           x + self.size, y + self.size,
-                                           fill='white',
-                                           outline='black'
-                                           )
+        self.instance = self.c.create_rectangle(x, y,
+                                                x + self.size, y + self.size,
+                                                fill='white',
+                                                outline='black'
+                                                )
 
 
 class Snake:
-    def __init__(self, first_segment:Segment):
-        self.c = first_segment.c
+    def __init__(self, first_segment: Segment):
+        self.c: Canvas = first_segment.c
         self.segment = first_segment
         self.SEG_SIZE = self.segment.size
         self.segments = [self.segment,
-                         Segment(self.SEG_SIZE, self.SEG_SIZE*2, self.SEG_SIZE,self.c),
-                         Segment(self.SEG_SIZE, self.SEG_SIZE*3, self.SEG_SIZE, self.c)
-                         ]
+            Segment(self.SEG_SIZE, self.SEG_SIZE*2, self.SEG_SIZE, self.c),
+            Segment(self.SEG_SIZE, self.SEG_SIZE*3, self.SEG_SIZE, self.c),
+            ]
         self.vector = 'right'
+        self.score = 0
+        self.score_text = self.c.create_text(50, 20,
+                                             text="Счет: 0",
+                                             fill='white'
+                                             )
+        self.head = self.segments[-1].instance
+
     def move(self):
         """
         Двигаем змейку в заданном направлении
@@ -33,28 +41,43 @@ class Snake:
             x1, y1, x2, y2 = self.c.coords(self.segments[index+1].instance)
             self.c.coords(segment, x1, y1, x2, y2)
 
-        x1, y1, x2, y2 = self.c.coords(self.segments[-1].instance)
+        x1, y1, x2, y2 = self.get_head_pos()
         match self.vector:
             case 'right':
-                self.c.coords(self. segments[-1].instance,
+                self.c.coords(self. head,
                          x1 + self.SEG_SIZE, y1,
                          x2 + self.SEG_SIZE, y2
                          )
             case 'left':
-                self.c.coords(self.segments[-1].instance,
+                self.c.coords(self.head,
                          x1 - self.SEG_SIZE, y1,
                          x2 - self.SEG_SIZE, y2
                          )
             case 'up':
-                self.c.coords(self.segments[-1].instance,
+                self.c.coords(self.head,
                          x1, y1 - self.SEG_SIZE,
                          x2, y2 - self.SEG_SIZE
                          )
             case 'down':
-                self.c.coords(self.segments[-1].instance,
+                self.c.coords(self.head,
                          x1, y1 + self.SEG_SIZE,
                          x2, y2 + self.SEG_SIZE
                          )
+        self.check_in_field()
+
+    def get_head_pos(self):
+        return self.c.coords(self.head)
+
+    def check_in_field(self):
+        """
+        Проверка, а не вышли ли мы за пределы поля
+        :return:
+        """
+        x1, y1, x2, y2 = self.get_head_pos()
+        if (x1 < 0 or x2 > self.c.winfo_width()
+                or y1 < 0 or y2 > self.c.winfo_height()):
+            self.c.delete('all')
+
 
     def change_direction(self, event):
         """
@@ -76,14 +99,26 @@ class Snake:
                 # print('right')
                 self.vector = 'right'
 
-    def add_segment(self):
-        last_seg =self.c.coords(self.segments[-1].instance)
-        x =last_seg[0]
-        y =last_seg[1]
-        self.segments.insert(0,Segment(self.SEG_SIZE,x,y,self.c))
+    def add_segment(self, val):
+        last_seg = self.c.coords(self.head)
+        x = last_seg[0]
+        y = last_seg[1]
+        if val > 0:
+            for i in range(val):
+                self.segments.insert(0, Segment(self.SEG_SIZE, x, y, self.c))
+        else:
+            for i in range(abs(val)):
+                self.c.delete(self.segments[0].instance)
+                self.segments.pop(0)
+
+    def change_score(self, val):
+        self.c.delete(self.score_text)
+        self.score += val
+        self.score_text = self.c.create_text(50, 20, text=f'Счёт: {self.score}', fill='white')
+
 
 class Food:
-    def __init__(self, snake: Snake, canvas: Canvas, img_path):
+    def __init__(self, snake: Snake, canvas: Canvas, img_path, val=1):
         self.s = snake
         self.c = canvas
         self.SEG_SIZE = self.s.segments[0].size
@@ -93,6 +128,7 @@ class Food:
         self.image = ImageTk.PhotoImage(self.image)
         self.instance = self.c.create_image(self.pos_x, self.pos_y,
                                             image=self.image, anchor=NW)
+        self.val = val
 
     def check_snake(self):
         snake_head_coords = self.c.coords(self.s.segments[-1].instance)
@@ -100,7 +136,8 @@ class Food:
         if snake_head_coords == [self.pos_x, self.pos_y, self.pos_x + self.SEG_SIZE, self.pos_y + self.SEG_SIZE]:
             self.pos_x, self.pos_y = self.generate_rand_pos()
             self.c.coords(self.instance, self.pos_x, self.pos_y)
-            self.s.add_segment()
+            self.s.add_segment(self.val)
+            self.s.change_score(self.val)
 
     def generate_rand_pos(self):
         rand_x = self.SEG_SIZE * (random.randint(1, (self.WIDTH - self.SEG_SIZE) // self.SEG_SIZE))

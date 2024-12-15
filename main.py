@@ -13,13 +13,13 @@ c = Canvas(root, width=WIDTH, height=HEIGHT, bg='#003300')
 c.pack()
 root.update()
 
-
 s = Snake(Segment(SEG_SIZE, SEG_SIZE, SEG_SIZE, c))
 
 c.focus_set()
 c.bind("<Key>", s.change_direction)
-apple = Food(s,c, "images/apple.png" ,)
-taco = Food(s,c, "images/taco.png" ,)
+
+apple = Food(s, c, "images/apple.png", -1)
+taco = Food(s, c, "images/taco.png", 3)
 
 
 def main():
@@ -27,6 +27,7 @@ def main():
     apple.check_snake()
     taco.check_snake()
     root.after(300, main)
+
 
 main()
 root.mainloop()
