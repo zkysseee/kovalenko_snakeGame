@@ -23,7 +23,7 @@ class Snake:
             Segment(self.SEG_SIZE, self.SEG_SIZE*2, self.SEG_SIZE, self.c),
             Segment(self.SEG_SIZE, self.SEG_SIZE*3, self.SEG_SIZE, self.c),
             ]
-        self.vector = 'right'
+        self.vector = 'stop'
         self.score = 0
         self.score_text = self.c.create_text(50, 20,
                                              text="Счет: 0",
@@ -36,6 +36,8 @@ class Snake:
         Двигаем змейку в заданном направлении
         :return:
         """
+        if self.vector == 'stop':
+             return
         for index in range(len(self.segments)-1):
             segment = self.segments[index].instance
             x1, y1, x2, y2 = self.c.coords(self.segments[index+1].instance)
