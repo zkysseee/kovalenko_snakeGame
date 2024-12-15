@@ -65,7 +65,7 @@ class Snake:
                          x1, y1 + self.SEG_SIZE,
                          x2, y2 + self.SEG_SIZE
                          )
-        self.check_in_field()
+
 
     def get_head_pos(self):
         return self.c.coords(self.head)
@@ -76,10 +76,8 @@ class Snake:
         :return:
         """
         x1, y1, x2, y2 = self.get_head_pos()
-        if (x1 < 0 or x2 > self.c.winfo_width()
-                or y1 < 0 or y2 > self.c.winfo_height()):
-            self.c.delete('all')
-
+        return not(x1 < 0 or x2 > self.c.winfo_width()
+                or y1 < 0 or y2 > self.c.winfo_height())
 
     def change_direction(self, event):
         """
@@ -152,16 +150,26 @@ class Game:
         self.c.update()
         self.segment_size = segment_size
 
+        self.start_new = True
+
+    def init_game(self):
         self.s = Snake(Segment(self.segment_size, self.segment_size, self.segment_size, self.c))
 
         self.c.focus_set()
-        self.c.bind("<Key>",self.s.change_direction)
+        self.c.bind("<Key>", self.s.change_direction)
 
         self.apple = Food(self.s, self.c, "images/apple.png", -1)
         self.taco = Food(self.s, self.c, "images/taco.png", 3)
 
+
     def main(self):
+        if self.start_new:
+            self.init_game()
+            self.start_new = False
         self.s.move()
+        if not self.s.check_in_field():
+            self.c.delete('all')
+            self.start_new = True
         self.apple.check_snake()
         self.taco.check_snake()
         self.c.after(300, self.main)
