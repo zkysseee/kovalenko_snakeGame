@@ -4,31 +4,31 @@ from PIL import Image, ImageTk
 
 
 class Segment:
-    def __init__(self, size, x, y, c):
-        self.size = size
-        self.c = c
-        self.instance = self.c.create_rectangle(x, y,
-                                                x + self.size, y + self.size,
-                                                fill='black',
-                                                outline='black'
-                                                )
+    def __init__(self, x, y,):
+        self.size = Game.SEG_SIZE
+        self.__c = Game.c
+        self.instance = self.__c.create_rectangle(x, y,
+                                                  x + self.size, y + self.size,
+                                                  fill='white',
+                                                  outline='green'
+                                                  )
 
 
 class Snake:
     def __init__(self, first_segment: Segment):
-        self.c: Canvas = first_segment.c
-        self.segment = first_segment
-        self.SEG_SIZE = self.segment.size
-        self.segments = [self.segment,
-            Segment(self.SEG_SIZE, self.SEG_SIZE*2, self.SEG_SIZE, self.c),
-            Segment(self.SEG_SIZE, self.SEG_SIZE*3, self.SEG_SIZE, self.c),
+        self.__c: Canvas = Game.c
+        self.__segment = first_segment
+        self.SEG_SIZE = self.__segment.size
+        self.segments = [self.__segment,
+            Segment(self.SEG_SIZE*2, self.SEG_SIZE,),
+            Segment(self.SEG_SIZE*3, self.SEG_SIZE,),
             ]
         self.vector = 'stop'
         self.score = 0
-        self.score_text = self.c.create_text(50, 20,
-                                             text="Счет: 0",
-                                             fill='white'
-                                             )
+        self.score_text = self.__c.create_text(Game.text_x, Game.text_y,
+                                               text="Счет: 0",
+                                               fill='white'
+                                               )
         self.head = self.segments[-1].instance
 
     def move(self):
@@ -40,35 +40,35 @@ class Snake:
              return
         for index in range(len(self.segments)-1):
             segment = self.segments[index].instance
-            x1, y1, x2, y2 = self.c.coords(self.segments[index+1].instance)
-            self.c.coords(segment, x1, y1, x2, y2)
+            x1, y1, x2, y2 = self.__c.coords(self.segments[index + 1].instance)
+            self.__c.coords(segment, x1, y1, x2, y2)
 
         x1, y1, x2, y2 = self.get_head_pos()
         match self.vector:
             case 'right':
-                self.c.coords(self. head,
-                         x1 + self.SEG_SIZE, y1,
-                         x2 + self.SEG_SIZE, y2
-                         )
+                self.__c.coords(self. head,
+                                x1 + self.SEG_SIZE, y1,
+                                x2 + self.SEG_SIZE, y2
+                                )
             case 'left':
-                self.c.coords(self.head,
-                         x1 - self.SEG_SIZE, y1,
-                         x2 - self.SEG_SIZE, y2
-                         )
+                self.__c.coords(self.head,
+                                x1 - self.SEG_SIZE, y1,
+                                x2 - self.SEG_SIZE, y2
+                                )
             case 'up':
-                self.c.coords(self.head,
-                         x1, y1 - self.SEG_SIZE,
-                         x2, y2 - self.SEG_SIZE
-                         )
+                self.__c.coords(self.head,
+                                x1, y1 - self.SEG_SIZE,
+                                x2, y2 - self.SEG_SIZE
+                                )
             case 'down':
-                self.c.coords(self.head,
-                         x1, y1 + self.SEG_SIZE,
-                         x2, y2 + self.SEG_SIZE
-                         )
+                self.__c.coords(self.head,
+                                x1, y1 + self.SEG_SIZE,
+                                x2, y2 + self.SEG_SIZE
+                                )
 
 
     def get_head_pos(self):
-        return self.c.coords(self.head)
+        return self.__c.coords(self.head)
 
     def check_in_field(self):
         """
@@ -76,8 +76,8 @@ class Snake:
         :return:
         """
         x1, y1, x2, y2 = self.get_head_pos()
-        return not(x1 < 0 or x2 > self.c.winfo_width()
-                or y1 < 0 or y2 > self.c.winfo_height())
+        return not(x1 < 0 or x2 > self.__c.winfo_width()
+                   or y1 < 0 or y2 > self.__c.winfo_height())
 
     def change_direction(self, event):
         """
@@ -100,25 +100,25 @@ class Snake:
                 self.vector = 'right'
 
     def add_segment(self, val):
-        last_seg = self.c.coords(self.head)
+        last_seg = self.__c.coords(self.head)
         x = last_seg[0]
         y = last_seg[1]
         if val > 0:
             for i in range(val):
-                self.segments.insert(0, Segment(self.SEG_SIZE, x, y, self.c))
+                self.segments.insert(0, Segment( x, y,))
         else:
             for i in range(abs(val)):
-                self.c.delete(self.segments[0].instance)
+                self.__c.delete(self.segments[0].instance)
                 self.segments.pop(0)
 
     def change_score(self, val):
-        self.c.delete(self.score_text)
+        self.__c.delete(self.score_text)
         self.score += val
-        self.score_text = self.c.create_text(50, 20, text=f'Счёт: {self.score}', fill='white')
+        self.score_text = self.__c.create_text(Game.text_x, Game.text_y, text=f'Счёт: {self.score}', fill='white')
 
     def bite_yourself(self):
         for index in range(len(self.segments)-1):
-            if self.c.coords(self.segments[index].instance)== self.get_head_pos():
+            if self.__c.coords(self.segments[index].instance)== self.get_head_pos():
                 return True
             return False
 
@@ -150,19 +150,30 @@ class Food:
         return rand_x, rand_y
 
 class Game:
-    def __init__(self,c: Canvas,segment_size):
-        self.c = c
-        self.c.update()
-        self.segment_size = segment_size
+    root = None
+    c = None
+    score_text = None
+    WIDTH = 800
+    HEIGHT = 600
+    SEG_SIZE = 20
+    text_x, text_y = WIDTH * 0.9 , HEIGHT * 0.1
+
+    def __new__(cls,*args,**kwargs):
+        cls.root = kwargs['root']
+        cls.c = Canvas(cls.root, width=cls.WIDTH, height=cls.HEIGHT, bg='#003300')
+        cls.c.pack()
+        cls.c.update()
+        return super().__new__(cls)
+
+    def __init__(self,root):
         self.start_new = True
-        Game.SEG_SIZE = segment_size
+
 
     def init_game(self):
-        self.s = Snake(Segment(self.segment_size, self.segment_size, self.segment_size, self.c))
+        self.s = Snake(Segment(self.SEG_SIZE, self.SEG_SIZE,))
 
         self.c.focus_set()
         self.c.bind("<Key>", self.s.change_direction)
-
         self.apple = Food(self.s, self.c, "images/apple.png", -1)
         self.taco = Food(self.s, self.c, "images/taco.png", 3)
 
