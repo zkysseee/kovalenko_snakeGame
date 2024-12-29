@@ -217,7 +217,7 @@ class Game:
             with open('scores.txt','w') as f:
                 f.write(score_str+'\n')
         else:
-            with open('scores.txt','w') as f:
+            with open('scores.txt','a') as f:
                 f.write(score_str + '\n')
         wind.destroy()
 
@@ -237,8 +237,7 @@ class Game:
                 self.c.delete('all')
                 self.start_new = True
             else:
-                self.root.destroy()
-
+                self.root.quit()
         self.apple.check_snake()
         self.taco.check_snake()
         self.c.after(300, self.main)
