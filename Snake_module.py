@@ -1,5 +1,7 @@
 from distutils.command.build import build
-from importlib.metadata import entry_points
+from importlib.metadata import entry_points, metadata
+from multiprocessing.connection import answer_challenge
+from pyexpat.errors import messages
 from tkinter import *
 import random , os
 import random
@@ -224,10 +226,19 @@ class Game:
             self.init_game()
             self.start_new = False
         self.s.move()
+
+
         if not self.s.check_in_field() or self.s.bite_yourself():
             self.show_name_input()
-            self.c.delete('all')
-            self.start_new = True
+            answer_yes = mb.askyesno(title="конец",
+                                message='Продолжить игру?'
+                                )
+            if answer_yes:
+                self.c.delete('all')
+                self.start_new = True
+            else:
+                self.root.destroy()
+
         self.apple.check_snake()
         self.taco.check_snake()
         self.c.after(300, self.main)
