@@ -1,6 +1,12 @@
+from distutils.command.build import build
+from importlib.metadata import entry_points
 from tkinter import *
+import random , os
 import random
+from xml.sax.saxutils import escape
+
 from PIL import Image, ImageTk
+from tkinter import messagebox as mb
 
 
 class Segment:
@@ -159,7 +165,7 @@ class Game:
     text_x, text_y = WIDTH * 0.9 , HEIGHT * 0.1
 
     def __new__(cls,*args,**kwargs):
-        cls.root = kwargs['root']
+        cls.root:Tk = kwargs['root']
         cls.c = Canvas(cls.root, width=cls.WIDTH, height=cls.HEIGHT, bg='#003300')
         cls.c.pack()
         cls.c.update()
@@ -178,12 +184,48 @@ class Game:
         self.taco = Food(self.s, self.c, "images/taco.png", 3)
 
 
+    def show_name_input(self):
+        top = Toplevel(self.root)
+        top.title('введите имя')
+
+        # координаты главного окна
+        x = self.root.winfo_x()
+        y = self.root.winfo_y()
+
+        # считаем координаты name_input
+        x = x + self.root.winfo_width()//2
+        y = y + self.root.winfo_height()//2
+        top.geometry(f'+{x}+{y}')
+
+
+
+        entry = Entry(top,textvariable= StringVar())
+        entry.pack()
+        button = Button(top, text = 'OK',command=lambda:self.save_result(entry.get(),top))
+        button.pack()
+
+        top.focus_force()
+        top.grab_set()
+        top.wait_window()
+
+
+    def save_result(self,name, wind):
+        score_str =f'{name}: {self.s.score}'
+        if not os.path.exists("scores.txt"):
+            with open('scores.txt','w') as f:
+                f.write(score_str+'\n')
+        else:
+            with open('scores.txt','w') as f:
+                f.write(score_str + '\n')
+        wind.destroy()
+
     def main(self):
         if self.start_new:
             self.init_game()
             self.start_new = False
         self.s.move()
         if not self.s.check_in_field() or self.s.bite_yourself():
+            self.show_name_input()
             self.c.delete('all')
             self.start_new = True
         self.apple.check_snake()
